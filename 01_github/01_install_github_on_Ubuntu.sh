@@ -16,3 +16,11 @@ git commit -m "Test git on Ubuntu"
 git remote add origin https://github.com/loganSQL/UbuntuSQL.git
 git push origin master
 
+
+# https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes
+git remote -v
+
+git add 02_bash/
+git add 02_bash/bash_scripts
+git commit -m "bash basic"
+git push origin master
