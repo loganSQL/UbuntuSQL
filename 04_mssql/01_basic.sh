@@ -34,7 +34,6 @@ sqlcmd -S yourip:1401 -Usa
 #
 # Housekeep
 #
-docker stop sql1
 sudo docker stop sql1
 sudo docker rm sql1
 
