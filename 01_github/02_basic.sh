@@ -59,3 +59,43 @@ git status
 git status
 git checkout -- myunwantedfile
 
+###########
+# remotes
+###########
+# Clone: Showing Your Remotes
+git clone https://github.com/logansql/UbuntuSQL
+cd UbuntuSQL
+git remote
+git remote -v
+
+# Adding Remote Repositories
+git remote add sqldba https://github.com/logansql/SQLDBA
+git remote -v
+# now sqladba is the short name for URL
+
+# Fetching from Your Remotes
+# fetch to sqldba/master branch
+# git fetch command only downloads the data to your local repository — it doesn’t automatically merge it with any of your work or modify what you’re currently working on. 
+git fetch sqldba
+
+# Pulling from Your Remotes
+#If your current branch is set up to track a remote branch (see the next section and Git Branching for more information), you can use the git pull command to automatically fetch and then merge that remote branch into your current branch. This may be an easier or more comfortable workflow for you; and by default, the git clone command automatically sets up your local master branch to track the remote master branch (or whatever the default branch is called) on the server you cloned from. Running git pull generally fetches data from the server you originally cloned from and automatically tries to merge it into the code you’re currently working on
+git fetch origin
+
+# Push to remotes
+#  you want to push your master branch to your origin server (again, cloning generally sets up both of those names for you automatically), then you can run this to push any commits you’ve done back up to the server:
+git push origin master
+# This command works only if you cloned from a server to which you have write access and if nobody has pushed in the meantime. If you and someone else clone at the same time and they push upstream and then you push upstream, your push will rightly be rejected. You’ll have to fetch their work first and incorporate it into yours before you’ll be allowed to push.
+
+# Inspect a remote
+git remote show origin
+
+# Renaming and Removing Remotes
+git remote rename sqldba sqldba_win
+git remote
+
+git remote remove sqldba_win
+git remote
+
+
+
