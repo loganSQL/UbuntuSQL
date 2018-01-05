@@ -39,3 +39,23 @@ git log
 git log -p -2
 # show stats
 git log --stat
+
+# amend
+# if you commit and then realize you forgot to stage the changes in a file you wanted to add to this commit
+git commit -m 'initial commit'
+git add forgotten_file
+git commit --amend
+
+# Unstaging a Staged File 
+# use "git reset HEAD <file>..." to unstage
+git add *
+git status
+#### unstaged oneoffile
+git reset HEAD oneoffile
+git status
+
+# Unmodifying a Modified File
+# use "git checkout -- <file>..." to discard changes in working directory
+git status
+git checkout -- myunwantedfile
+
