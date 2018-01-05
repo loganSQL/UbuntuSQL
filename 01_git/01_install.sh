@@ -1,5 +1,5 @@
 #!/bin/bash
-# A Installation Bash script for github on Ubuntu
+# A Installation Bash script for git on Ubuntu
 # https://www.howtoforge.com/tutorial/install-git-and-github-on-ubuntu-14.04/
 sudo apt-get install git
 git config --global user.name "logansql"
