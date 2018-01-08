@@ -19,3 +19,5 @@ tar -xvf ~/sqlops-linux-<version string>.tar.gz
 echo 'export PATH="$PATH:~/sqlops-linux-x64"' >> ~/.bashrc
 source ~/.bashrc
 sqlops
+
+server: localhost,1401
