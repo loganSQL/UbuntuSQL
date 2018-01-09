@@ -39,7 +39,7 @@ sudo systemctl restart mssql-server
 
 # 6. View current settings
 sudo cat /var/opt/mssql/mssql.conf
-
+: <<'END'
 [EULA]
 accepteula = Y
 
@@ -85,3 +85,4 @@ userrequestedlocalauditdirectory = /tmp/audit
 traceflag0 = 1204
 traceflag1 = 2345
 traceflag = 3456
+END
