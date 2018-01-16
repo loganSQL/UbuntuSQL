@@ -19,3 +19,20 @@ Xmas2017
 
 # 5. Once the configuration is done, verify that the service is running:
 systemctl status mssql-server
+
+# 6. if not, start it
+sudo systemctl start mssql-server
+
+# 7. stop the sql
+sudo systemctl stop mssql-server
+
+# 8. default directories 
+# software
+/opt/mssql/bin
+/opt/mssql/lib
+# instance
+/var/opt/mssql
+/var/opt/mssql/data
+/var/opt/mssql/log
+# errorlog
+sudo cat /var/opt/mssql/log/errorlog
