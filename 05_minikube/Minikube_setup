@@ -1,0 +1,144 @@
+Install Docker Engine
+Install Docker Machine
+Install Kubectl
+Install KVM for ubuntu (https://help.ubuntu.com/community/KVM/Installation)
+Install KVM driver for Kubernetes
+
+
+
+logan@ubuntu:~$ docker-machine
+
+logan@ubuntu:~$ ls -l /usr/local/bin
+total 145860
+-rwxr-xr-x 1 root  root  26574656 Feb 19 13:49 docker-machine
+-rwxrwxr-x 1 logan logan 11889064 Feb 18 19:47 docker-machine-driver-kvm
+-rwxrwxr-x 1 logan logan 67390456 Feb 18 19:26 kubectl
+-rwxrwxr-x 1 logan logan 43501826 Feb 18 19:32 minikube
+
+logan@ubuntu:~$ virsh list --all
+ Id    Name                           State
+----------------------------------------------------
+ -     minikube                       shut off
+
+logan@ubuntu:~$ sudo ls -la /var/run/libvirt/libvirt-sock
+srwxrwx--- 1 root libvirtd 0 Feb 20 07:56 /var/run/libvirt/libvirt-sock
+
+logan@ubuntu:~$ ls -l /dev/kvm
+crw-rw----+ 1 root kvm 10, 232 Feb 20 07:56 /dev/kvm
+
+logan@ubuntu:~$ sudo apt-get install virt-manager
+ ...
+logan@ubuntu:~$ virt-manager &
+... to start minikube
+
+logan@ubuntu:~$ virsh list --all
+ Id    Name                           State
+----------------------------------------------------
+ 2     minikube                       running
+
+[2]+  Done                    virt-manager
+
+logan@ubuntu:~$ kubectl cluster-info
+Kubernetes master is running at http://localhost:8080
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+
+https://kubernetes.io/docs/getting-started-guides/minikube/
+
+logan@ubuntu:~$ minikube ip
+192.168.42.75
+
+logan@ubuntu:~$ minikube start
+Starting local Kubernetes v1.9.0 cluster...
+Starting VM...
+Getting VM IP address...
+Moving files into cluster...
+Downloading localkube binary
+ 162.41 MB / 162.41 MB [============================================] 100.00% 0s
+ 65 B / 65 B [======================================================] 100.00% 0s
+Setting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+Loading cached images from config file.
+
+logan@ubuntu:~$ kubectl run hello-minikube --image=k8s.gcr.io/echoserver:1.4 --port=8080
+deployment "hello-minikube" created
+logan@ubuntu:~$ kubectl expose deployment hello-minikube --type=NodePort
+service "hello-minikube" exposed
+
+logan@ubuntu:~$ kubectl get pod
+NAME                            READY     STATUS    RESTARTS   AGE
+hello-minikube-c6c6764d-rx7xr   1/1       Running   0          46s
+
+logan@ubuntu:~$ curl $(minikube service hello-minikube --url)
+CLIENT VALUES:
+client_address=172.17.0.1
+command=GET
+real path=/
+query=nil
+request_version=1.1
+request_uri=http://192.168.42.75:8080/
+
+SERVER VALUES:
+server_version=nginx: 1.10.0 - lua: 10001
+
+HEADERS RECEIVED:
+accept=*/*
+host=192.168.42.75:31806
+user-agent=curl/7.47.0
+BODY:
+-no body in request-
+
+logan@ubuntu:~$ kubectl delete deployment hello-minikube
+deployment "hello-minikube" deleted
+
+logan@ubuntu:~$ minikube stop
+Stopping local Kubernetes cluster...
+Machine stopped.
+
+logan@ubuntu:~$ minikube start
+Starting local Kubernetes v1.9.0 cluster...
+Starting VM...
+Getting VM IP address...
+Moving files into cluster...
+Setting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+Loading cached images from config file.
+logan@ubuntu:~$ 
+
+https://github.com/kubernetes/minikube
+
+kubectl
+-------
+
+The minikube start command creates a "kubectl context" called "minikube". This context contains the configuration to communicate with your Minikube cluster.
+
+Minikube sets this context to default automatically, but if you need to switch back to it in the future, run:
+
+kubectl config use-context minikube
+
+or pass the context on each command like this: kubectl get pods --context=minikube.
+
+Dashboard
+---------
+
+To access the Kubernetes Dashboard, run this command in a shell after starting Minikube to get the address:
+
+minikube dashboard
+
+Services
+---------
+
+To access a service exposed via a node port, run this command in a shell after starting Minikube to get the address:
+
+minikube service [-n NAMESPACE] [--url] NAME
+
+minikube service hello-minikube --url
+
+
