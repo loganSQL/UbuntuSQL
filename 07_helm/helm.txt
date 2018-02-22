@@ -1,0 +1,226 @@
+https://docs.helm.sh/using_helm/#quickstart-guide
+
+
+
+logan@ubuntu:~$ virsh list --all
+ Id    Name                           State
+----------------------------------------------------
+ -     minikube                       shut off
+
+logan@ubuntu:~$ virt-manager &
+[1] 3402
+logan@ubuntu:~$ virt-manager &
+[2] 3638
+[1]   Done                    virt-manager
+logan@ubuntu:~$ kubectl cluster-info
+Kubernetes master is running at https://192.168.42.75:8443
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+Unable to connect to the server: dial tcp 192.168.42.75:8443: getsockopt: no route to host
+[2]+  Done                    virt-manager
+logan@ubuntu:~$ minikube ip
+192.168.42.75
+logan@ubuntu:~$ minikube start
+Starting local Kubernetes v1.9.0 cluster...
+Starting VM...
+Getting VM IP address...
+Moving files into cluster...
+Setting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+Loading cached images from config file.
+logan@ubuntu:~$ kubectl config current-context
+minikube
+logan@ubuntu:~$ helm init
+$HELM_HOME has been configured at /home/logan/.helm.
+
+Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
+Happy Helming!
+
+
+logan@ubuntu:~$ helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Skip local chart repository
+...Successfully got an update from the "stable" chart repository
+Update Complete. ⎈ Happy Helming!⎈ 
+logan@ubuntu:~$ helm install stable/mysql
+NAME:   quarrelsome-moose
+LAST DEPLOYED: Wed Feb 21 17:08:46 2018
+NAMESPACE: default
+STATUS: DEPLOYED
+
+RESOURCES:
+==> v1/Secret
+NAME                     TYPE    DATA  AGE
+quarrelsome-moose-mysql  Opaque  2     1s
+
+==> v1/PersistentVolumeClaim
+NAME                     STATUS   VOLUME    CAPACITY  ACCESS MODES  STORAGECLASS  AGE
+quarrelsome-moose-mysql  Pending  standard  1s
+
+==> v1/Service
+NAME                     TYPE       CLUSTER-IP      EXTERNAL-IP  PORT(S)   AGE
+quarrelsome-moose-mysql  ClusterIP  10.107.162.248  <none>       3306/TCP  1s
+
+==> v1beta1/Deployment
+NAME                     DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+quarrelsome-moose-mysql  1        1        1           0          1s
+
+==> v1/Pod(related)
+NAME                                      READY  STATUS    RESTARTS  AGE
+quarrelsome-moose-mysql-5f6995c747-zpz22  0/1    Init:0/1  0         0s
+
+
+NOTES:
+MySQL can be accessed via port 3306 on the following DNS name from within your cluster:
+quarrelsome-moose-mysql.default.svc.cluster.local
+
+To get your root password run:
+
+    MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default quarrelsome-moose-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo)
+
+To connect to your database:
+
+1. Run an Ubuntu pod that you can use as a client:
+
+    kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+
+2. Install the mysql client:
+
+    $ apt-get update && apt-get install mysql-client -y
+
+3. Connect using the mysql cli, then provide your password:
+    $ mysql -h quarrelsome-moose-mysql -p
+
+To connect to your database directly from outside the K8s cluster:
+    MYSQL_HOST=127.0.0.1
+    MYSQL_PORT=3306
+
+    # Execute the following commands to route the connection:
+    export POD_NAME=$(kubectl get pods --namespace default -l "app=quarrelsome-moose-mysql" -o jsonpath="{.items[0].metadata.name}")
+    kubectl port-forward $POD_NAME 3306:3306
+
+    mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
+
+logan@ubuntu:~$ helm inspect stable/mysql
+description: Fast, reliable, scalable, and easy to use open-source relational database
+  system.
+engine: gotpl
+home: https://www.mysql.com/
+icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
+keywords:
+- mysql
+- database
+- sql
+maintainers:
+- email: viglesias@google.com
+  name: Vic Iglesias
+name: mysql
+sources:
+- https://github.com/kubernetes/charts
+- https://github.com/docker-library/mysql
+version: 0.3.4
+
+---
+## mysql image version
+## ref: https://hub.docker.com/r/library/mysql/tags/
+##
+image: "mysql"
+imageTag: "5.7.14"
+
+## Specify password for root user
+##
+## Default: random 10 character string
+# mysqlRootPassword: testing
+
+## Create a database user
+##
+# mysqlUser:
+# mysqlPassword:
+
+## Allow unauthenticated access, uncomment to enable
+##
+# mysqlAllowEmptyPassword: true
+
+## Create a database
+##
+# mysqlDatabase:
+
+## Specify an imagePullPolicy (Required)
+## It's recommended to change this to 'Always' if the image tag is 'latest'
+## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
+##
+imagePullPolicy: IfNotPresent
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+
+## Persist data to a persistent volume
+persistence:
+  enabled: true
+  ## database data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 8Gi
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+
+# Custom mysql configuration files used to override default mysql settings
+configurationFiles:
+#  mysql.cnf: |-
+#    [mysqld]
+#    skip-name-resolve
+
+
+## Configure the service
+## ref: http://kubernetes.io/docs/user-guide/services/
+service:
+  ## Specify a service type
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services---service-types
+  type: ClusterIP
+  port: 3306
+
+
+
+logan@ubuntu:~$ helm ls
+NAME             	REVISION	UPDATED                 	STATUS  	CHART      	NAMESPACE
+quarrelsome-moose	1       	Wed Feb 21 17:08:46 2018	DEPLOYED	mysql-0.3.4	default
+
+logan@ubuntu:~$ helm delete quarrelsome-moose
+release "quarrelsome-moose" deleted
+logan@ubuntu:~$ helm status quarrelsome-moose
+LAST DEPLOYED: Wed Feb 21 17:08:46 2018
+NAMESPACE: default
+STATUS: DELETED
+...
+logan@ubuntu:~$ minikube stop
+Stopping local Kubernetes cluster...
+Machine stopped.
+
+
+
