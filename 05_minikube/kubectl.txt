@@ -1,0 +1,172 @@
+https://kubernetes.io/docs/reference/kubectl/overview/
+
+kubectl [command] [TYPE] [NAME] [flags]
+
+1. kubectl create - Create a resource from a file or stdin.
+-----------------------------------------------------------
+// Create a service using the definition in example-service.yaml.
+$ kubectl create -f example-service.yaml
+
+// Create a replication controller using the definition in example-controller.yaml.
+$ kubectl create -f example-controller.yaml
+
+// Create the objects that are defined in any .yaml, .yml, or .json file within the <directory> directory.
+$ kubectl create -f <directory>
+
+Nginx Server Deployment using Kubernetes
+-----------------------------------------
+    (1) Create a folder
+
+    $ mkdir nginx_kube_example
+    $ cd nginx_kube_example
+
+
+    (2) Create the yaml file in the editor of your choice which will be used to deploy nginx pod
+
+    $ vi nginx_pod.yaml
+
+    apiVersion: v1
+    kind: ReplicationController
+    metadata:
+      name: nginx
+    spec:
+      replicas: 2
+      selector:
+        app: nginx
+      template:
+        metadata:
+          name: nginx
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx
+            ports:
+            - containerPort: 80
+
+    (3) Create the nginx pod using kubectl
+
+    $ kubectl create -f nginx_pod.yaml
+
+    (4) two replicas of the nginx pod were created
+
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ kubectl get pods
+NAME          READY     STATUS    RESTARTS   AGE
+nginx-c8d5x   1/1       Running   0          7m
+nginx-lpvbr   1/1       Running   0          7m
+
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ kubectl get rc
+NAME      DESIRED   CURRENT   READY     AGE
+nginx     2         2         2         7m
+
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ eval $(minikube docker-env)
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ docker ps
+CONTAINER ID        IMAGE                                      COMMAND                  CREATED             STATUS              PORTS               NAMES
+b76d47018705        nginx                                      "nginx -g 'daemon of…"   7 minutes ago       Up 7 minutes                            k8s_nginx_nginx-lpvbr_default_9ed36b5c-17e1-11e8-8ddc-525400285c6a_0
+db572016eae2        nginx                                      "nginx -g 'daemon of…"   7 minutes ago       Up 7 minutes                            k8s_ngi
+
+
+    (5) Deploy the nginx service using yaml file to expose the nginx pod on the host port “82”
+
+    $ vi nginx_service.yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        name: nginxservice
+      name: nginxservice
+    spec:
+      ports:
+        # The port that this service should serve on.
+        - port: 82
+      # Label keys and values that must match in order to receive traffic for this service.
+      selector:
+        app: nginx
+      type: LoadBalancer
+
+
+    (6) Create the nginx service using kubectl
+
+    $kubectl create -f nginx_service.yaml
+    service "nginxservice" created
+
+
+    (7) The nginx service can be listed as follow
+
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ kubectl get services
+NAME             TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+hello-minikube   NodePort       10.110.91.124   <none>        8080:31806/TCP   1d
+kubernetes       ClusterIP      10.96.0.1       <none>        443/TCP          1d
+nginxservice     LoadBalancer   10.111.55.156   <pending>     82:30136/TCP     21m
+Now the nginx server test page can be accessed on the following URL; http://127.0.0.1:82
+
+    (8) delete the nginx pod (replicationcontroller) and service
+
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ kubectl delete service nginxservice
+service "nginxservice" deleted
+logan@ubuntu:~/ubuntusql/05_minikube/nginx_kube_example$ kubectl delete rc nginx
+replicationcontroller "nginx" deleted
+
+Pod Deployment with two containers
+-----------------------------------
+    (1) two containers in same pod
+
+    $ vi nginx-mysql.json
+    {
+       "id":"nginx-mysql",
+       "kind": "Pod",
+       "apiVersion": "v1",
+       "metadata": {
+          "name": "nginx-mysql",
+          "labels": {
+             "name": "nginx-mysql"
+          }
+       },
+       "spec": {
+          "containers": [
+             {
+                "name": "nginx",
+                "image": "nginx",
+                "ports": [
+                   {
+                      "hostPort": 85,
+                      "containerPort": 80
+                   }
+                ]
+             },
+             {
+                "name": "mysql",
+                "image": "mysql",
+                "ports": [
+                   {
+                      "hostPort": 3306,
+                      "containerPort": 3306
+                   }
+                ]
+             }
+          ]
+       }
+    }
+
+
+    (2) Create the pod
+
+    $ kubectl create -f nginx-mysql.json
+    $ kubectl get pods
+    $ kubectl delete -f nginx-mysql.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
