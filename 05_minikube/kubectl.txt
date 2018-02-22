@@ -157,7 +157,106 @@ Pod Deployment with two containers
     $ kubectl delete -f nginx-mysql.json
 
 
+Exploring the pod and server interactively
+------------------------------------------
+https://kubernetes.io/docs/tasks/debug-application-cluster/debug-service/
+(1) create a pod
+kubectl run mynginx --image=nginx \
+                        --labels=app=mynginx \
+                        --port=9376 \
+                        --replicas=1
+deployment "mynginx" created
 
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pods
+NAME                       READY     STATUS    RESTARTS   AGE
+mynginx-59d56f4bc5-t7vvp   1/1       Running   0          32m
+
+(2) run commands in a pod
+kubectl run -it --rm --restart=Never busybox --image=busybox sh
+
+or
+If you already have a running Pod that you prefer to use, you can run a command in it using:
+kubectl exec <POD-NAME> -c <CONTAINER-NAME> -- <COMMAND>
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl exec mynginx-59d56f4bc5-t7vvp -c mynginx -- ls
+bin
+boot
+dev
+etc
+home
+lib
+lib64
+media
+mnt
+opt
+proc
+root
+run
+sbin
+srv
+sys
+tmp
+usr
+var
+
+(3) create the Service
+kubectl expose deployment mynginx --port=80 --target-port=9376
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get svc mynginx
+NAME      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+mynginx   ClusterIP   10.103.251.245   <none>        80/TCP    35m
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl run -it --rm --restart=Never busybox --image=busybox sh
+If you don't see a command prompt, try pressing enter.
+/ # nslookup mynginx
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      mynginx
+Address 1: 10.103.251.245 mynginx.default.svc.cluster.local
+/ # cat /etc/resolv.conf
+nameserver 10.96.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+
+(4) Read back your Service
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get service mynginx -o json
+{
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": {
+        "creationTimestamp": "2018-02-22T16:25:18Z",
+        "labels": {
+            "app": "mynginx"
+        },
+        "name": "mynginx",
+        "namespace": "default",
+        "resourceVersion": "9553",
+        "selfLink": "/api/v1/namespaces/default/services/mynginx",
+        "uid": "f8529afd-17ec-11e8-b504-525400285c6a"
+    },
+    "spec": {
+        "clusterIP": "10.103.251.245",
+        "ports": [
+            {
+                "port": 80,
+                "protocol": "TCP",
+                "targetPort": 9376
+            }
+        ],
+        "selector": {
+            "app": "mynginx"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+    },
+    "status": {
+        "loadBalancer": {}
+    }
+}
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get endpoints mynginx
+NAME      ENDPOINTS         AGE
+mynginx   172.17.0.7:9376   42m
 
 
 
