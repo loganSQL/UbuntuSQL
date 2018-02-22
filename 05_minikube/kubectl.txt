@@ -258,6 +258,151 @@ logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get endpoints mynginx
 NAME      ENDPOINTS         AGE
 mynginx   172.17.0.7:9376   42m
 
+kubectl delete service mynginx
+logan@ubuntu:~$ kubectl get pods --all-namespaces
+NAMESPACE     NAME                                    READY     STATUS    RESTARTS   AGE
+default       mynginx-59d56f4bc5-xhpqb                1/1       Running   2          1h
+kube-system   kube-addon-manager-minikube             1/1       Running   7          2d
+kube-system   kube-dns-54cccfbdf8-kqv99               3/3       Running   21         2d
+kube-system   kubernetes-dashboard-77d8b98585-lm5n8   1/1       Running   7          2d
+kube-system   storage-provisioner                     1/1       Running   7          2d
+kube-system   tiller-deploy-59d854595c-6fqbr          1/1       Running   5          17h
+logan@ubuntu:~$ kubectl delete pod mynginx-59d56f4bc5-xhpqb
+pod "mynginx-59d56f4bc5-xhpqb" deleted
+
+2. kubectl get - List one or more resources
+--------------------------------------------
+kubectl get - List one or more resources.
+
+// List all pods in plain-text output format.
+$ kubectl get pods
+
+// List all pods in plain-text output format and includes additional information (such as node name).
+$ kubectl get pods -o wide
+
+// List the replication controller with the specified name in plain-text output format. Tip: You can shorten and replace the 'replicationcontroller' resource type with the alias 'rc'.
+$ kubectl get replicationcontroller <rc-name>
+
+// List all replication controllers and services together in plain-text output format.
+$ kubectl get rc,services
+
+// List all daemon sets, including uninitialized ones, in plain-text output format.
+$ kubectl get ds --include-uninitialized
+
+// List all pods running on node server01
+$ kubectl get pods --field-selector=spec.nodeName=server01
+
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get nodes
+NAME       STATUS    ROLES     AGE       VERSION
+minikube   Ready     <none>    2d        v1.9.0
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pods
+NAME                       READY     STATUS    RESTARTS   AGE
+mynginx-59d56f4bc5-stxmg   1/1       Running   1          1h
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl describe pod mynginx-59d56f4bc5-stxmg
+...
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pod mynginx-59d56f4bc5-stxmg -o=yaml
+...
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pod mynginx-59d56f4bc5-stxmg -o=json
+
+...
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pods --sort-by=.metadata.name
+NAME                       READY     STATUS    RESTARTS   AGE
+mynginx-59d56f4bc5-stxmg   1/1       Running   1          1h
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pods --all-namespaces --sort-by=.metadata.name 
+NAMESPACE     NAME                                    READY     STATUS    RESTARTS   AGE
+kube-system   kube-addon-manager-minikube             1/1       Running   8          2d
+kube-system   kube-dns-54cccfbdf8-kqv99               3/3       Running   24         2d
+kube-system   kubernetes-dashboard-77d8b98585-lm5n8   1/1       Running   8          2d
+default       mynginx-59d56f4bc5-stxmg                1/1       Running   1          1h
+kube-system   storage-provisioner                     1/1       Running   8          2d
+kube-system   tiller-deploy-59d854595c-6fqbr          1/1       Running   6          19h
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get pods -o wide
+NAME                       READY     STATUS    RESTARTS   AGE       IP           NODE
+mynginx-59d56f4bc5-stxmg   1/1       Running   1          1h        172.17.0.3   minikube
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get rc,services
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+svc/hello-minikube   NodePort    10.110.91.124   <none>        8080:31806/TCP   2d
+svc/kubernetes       ClusterIP   10.96.0.1       <none>        443/TCP          2d
+
+3. kubectl describe - Display detailed state of one or more resources
+----------------------------------------------------------------------
+// Display the details of the node with name <node-name>.
+$ kubectl describe nodes <node-name>
+
+// Display the details of the pod with name <pod-name>.
+$ kubectl describe pods/<pod-name>
+
+// Display the details of all the pods that are managed by the replication controller named <rc-name>.
+// Remember: Any pods that are created by the replication controller get prefixed with the name of the replication controller.
+$ kubectl describe pods <rc-name>
+
+// Describe all pods, not including uninitialized ones
+$ kubectl describe pods --include-uninitialized=false
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl get nodes
+NAME       STATUS    ROLES     AGE       VERSION
+minikube   Ready     <none>    2d        v1.9.0
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl describe nodes minikube
+Name:               minikube
+Roles:              <none>
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/hostname=minikube
+Annotations:        node.alpha.kubernetes.io/ttl=0
+                    volumes.kubernetes.io/controller-managed-attach-detach=true
+Taints:             <none>
+....
+
+4. kubectl delete - Delete resources either from a file, stdin, or specifying label selectors, names, resource selectors, or resources.
+----------------------------------------------------------------------------------------------
+
+// Delete a pod using the type and name specified in the pod.yaml file.
+$ kubectl delete -f pod.yaml
+
+// Delete all the pods and services that have the label name=<label-name>.
+$ kubectl delete pods,services -l name=<label-name>
+
+// Delete all the pods and services that have the label name=<label-name>, including uninitialized ones.
+$ kubectl delete pods,services -l name=<label-name> --include-uninitialized
+
+// Delete all pods, including uninitialized ones.
+$ kubectl delete pods --all
+
+
+5. kubectl exec - Execute a command against a container in a pod.
+-----------------------------------------------------------------
+
+// Get output from running 'date' from pod <pod-name>. By default, output is from the first container.
+$ kubectl exec <pod-name> date
+
+// Get output from running 'date' in container <container-name> of pod <pod-name>.
+$ kubectl exec <pod-name> -c <container-name> date
+
+// Get an interactive TTY and run /bin/bash from pod <pod-name>. By default, output is from the first container.
+$ kubectl exec -ti <pod-name> /bin/bash
+
+logan@ubuntu:~/ubuntusql/05_minikube$ kubectl exec -ti mynginx-59d56f4bc5-stxmg /bin/bash
+root@mynginx-59d56f4bc5-stxmg:/# dir
+bin  boot  dev	etc  home  lib	lib64  media  mnt  opt	proc  root  run  sbin  srv  sys  tmp  usr  var
+root@mynginx-59d56f4bc5-stxmg:/# uname
+Linux
+root@mynginx-59d56f4bc5-stxmg:/# hostname
+mynginx-59d56f4bc5-stxmg
+
+6. kubectl logs - Print the logs for a container in a pod.
+----------------------------------------------------------
+
+// Return a snapshot of the logs from pod <pod-name>.
+$ kubectl logs <pod-name>
+
+// Start streaming the logs from pod <pod-name>. This is similar to the 'tail -f' Linux command.
+$ kubectl logs -f <pod-name>
+
 
 
 
