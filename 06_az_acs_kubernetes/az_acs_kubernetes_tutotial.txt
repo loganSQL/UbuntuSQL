@@ -1,0 +1,340 @@
+Azure Container Service Kubernetes Tutorial
+--------------------------------------------
+https://docs.microsoft.com/en-us/azure/container-service/kubernetes/container-service-tutorial-kubernetes-prepare-app
+
+1. Create container images to be used with Azure Container Service
+-------------------------------------------------------------------
+
+//download a copy of the application to your development environment.
+git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
+
+//Change directories so that you are working from the cloned directory.
+cd azure-voting-app-redis
+
+// fixing docker-machine and docker-compose
+// run it detached
+docker-compose up -d
+
+//install docker-compose if needed
+
+$ sudo apt remove docker-compose # OK
+$ sudo -i
+download from https://github.com/docker/compose/releases
+mv to /usr/local/bin
+$ chmod +x /usr/local/bin/docker-compose
+$ exit # to exit root shell
+
+docker-machine regenerate-certs default
+// need docker-machine
+docker-machine ls
+//sudo apt-get install virtualbox
+//docker-machine create --driver virtualbox default
+//
+docker-machine rm default
+docker-machine create --driver kvm default
+docker-machine ls
+docker-machine start default
+
+//
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker-machine ls
+NAME      ACTIVE   DRIVER   STATE     URL                         SWARM   DOCKER        ERRORS
+default   -        kvm      Running   tcp://192.168.42.200:2376           v18.02.0-ce   
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker-machine env default
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.42.200:2376"
+export DOCKER_CERT_PATH="/home/logan/.docker/machine/machines/default"
+export DOCKER_MACHINE_NAME="default"
+# Run this command to configure your shell: 
+# eval $(docker-machine env default)
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ export DOCKER_TLS_VERIFY="1"
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ export DOCKER_HOST="tcp://192.168.42.200:2376"
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ export DOCKER_CERT_PATH="/home/logan/.docker/machine/machines/default"logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ export DOCKER_MACHINE_NAME="default"
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker-compose up
+Creating network "azurevotingappredis_default" with the default driver
+Building azure-vote-front
+Step 1/3 : FROM    tiangolo/uwsgi-nginx-flask:python3.6
+python3.6: Pulling from tiangolo/uwsgi-nginx-flask
+723254a2c089: Pull complete
+abe15a44e12f: Pull complete
+409a28e3cc3d: Pull complete
+503166935590: Pull complete
+0f46f97746e4: Pull complete
+fe27feb3d509: Pull complete
+...
+azure-vote-front    | 2018-02-23 17:42:00,005 INFO spawned: 'uwsgi' with pid 9
+azure-vote-front    | [uWSGI] getting INI configuration from /app/uwsgi.ini
+azure-vote-front    | [uWSGI] getting INI configuration from /etc/uwsgi/uwsgi.ini
+azure-vote-front    | *** Starting uWSGI 2.0.15 (64bit) on [Fri Feb 23 17:42:00 2018] ***
+azure-vote-front    | compiled with version: 6.3.0 20170516 on 04 February 2018 16:22:48
+azure-vote-front    | os: Linux-4.4.115-boot2docker #1 SMP Thu Feb 8 17:36:45 UTC 2018
+azure-vote-front    | nodename: 39f6e0acc8c7
+azure-vote-front    | machine: x86_64
+azure-vote-front    | clock source: unix
+azure-vote-front    | pcre jit disabled
+azure-vote-front    | detected number of CPU cores: 1
+azure-vote-front    | current working directory: /app
+azure-vote-front    | detected binary path: /usr/local/bin/uwsgi
+azure-vote-front    | your processes number limit is 1048576
+azure-vote-front    | your memory page size is 4096 bytes
+azure-vote-front    | detected max file descriptor number: 1048576
+azure-vote-front    | lock engine: pthread robust mutexes
+azure-vote-front    | thunder lock: disabled (you can enable it with --thunder-lock)
+azure-vote-front    | uwsgi socket 0 bound to UNIX address /tmp/uwsgi.sock fd 3
+azure-vote-front    | uWSGI running as root, you can use --uid/--gid/--chroot options
+azure-vote-front    | *** WARNING: you are running uWSGI as root !!! (use the --uid flag) *** 
+azure-vote-front    | Python version: 3.6.4 (default, Dec 21 2017, 01:29:34)  [GCC 6.3.0 20170516]
+azure-vote-front    | *** Python threads support is disabled. You can enable it with --enable-threads ***
+azure-vote-front    | Python main interpreter initialized at 0x55f03e422b20
+azure-vote-front    | your server socket listen backlog is limited to 100 connections
+azure-vote-front    | your mercy for graceful operations on workers is 60 seconds
+azure-vote-front    | mapped 1237056 bytes (1208 KB) for 16 cores
+azure-vote-front    | *** Operational MODE: preforking ***
+azure-vote-front    | WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x55f03e422b20 pid: 9 (default app)
+azure-vote-front    | *** uWSGI is running in multiple interpreter mode ***
+azure-vote-front    | spawned uWSGI master process (pid: 9)
+azure-vote-front    | spawned uWSGI worker 1 (pid: 12, cores: 1)
+azure-vote-front    | spawned uWSGI worker 2 (pid: 13, cores: 1)
+azure-vote-front    | 2018-02-23 17:42:01,674 INFO success: nginx entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+// open another terminal
+logan@ubuntu:~$ export DOCKER_TLS_VERIFY="1"
+logan@ubuntu:~$ export DOCKER_HOST="tcp://192.168.42.200:2376"
+logan@ubuntu:~$ export DOCKER_CERT_PATH="/home/logan/.docker/machine/machines/default"
+logan@ubuntu:~$ export DOCKER_MACHINE_NAME="default"
+logan@ubuntu:~$ 
+logan@ubuntu:~$ docker images
+REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
+azure-vote-front             latest              3836a86acc83        4 minutes ago       935MB
+redis                        latest              33c26d72bd74        8 days ago          107MB
+tiangolo/uwsgi-nginx-flask   python3.6           d3f7d9a2f84d        2 weeks ago         935MB
+
+logan@ubuntu:~$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                           NAMES
+53268f3a318f        redis               "docker-entrypoint.s…"   5 minutes ago       Up 5 minutes        0.0.0.0:6379->6379/tcp          azure-vote-back
+39f6e0acc8c7        azure-vote-front    "/entrypoint.sh /sta…"   5 minutes ago       Up 5 minutes        443/tcp, 0.0.0.0:8080->80/tcp   azure-vote-front
+
+//web DOCKER_HOST
+http://192.168.42.200:8080/
+
+//from another terminal
+
+...
+azure-vote-front    | 192.168.42.1 - - [23/Feb/2018:17:50:26 +0000] "POST / HTTP/1.1" 200 950 "http://192.168.42.200:8080/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0" "-"
+azure-vote-front    | [pid: 12|app: 0|req: 6/11] 192.168.42.1 () {46 vars in 761 bytes} [Fri Feb 23 17:50:26 2018] POST / => generated 950 bytes in 1 msecs (HTTP/1.1 200) 2 headers in 80 bytes (2 switches on core 0)
+azure-vote-front    | 192.168.42.1 - - [23/Feb/2018:17:50:26 +0000] "POST / HTTP/1.1" 200 950 "http://192.168.42.200:8080/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0" "-"
+azure-vote-front    | [pid: 13|app: 0|req: 6/12] 192.168.42.1 () {46 vars in 761 bytes} [Fri Feb 23 17:50:27 2018] POST / => generated 950 bytes in 1 msecs (HTTP/1.1 200) 2 headers in 80 bytes (2 switches on core 0)
+azure-vote-front    | 192.168.42.1 - - [23/Feb/2018:17:50:27 +0000] "POST / HTTP/1.1" 200 950 "http://192.168.42.200:8080/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0" "-"
+azure-vote-front    | [pid: 12|app: 0|req: 7/13] 192.168.42.1 () {46 vars in 761 bytes} [Fri Feb 23 17:50:27 2018] POST / => generated 950 bytes in 1 msecs (HTTP/1.1 200) 2 headers in 80 bytes (2 switches on core 0)
+azure-vote-front    | 192.168.42.1 - - [23/Feb/2018:17:50:27 +0000] "POST / HTTP/1.1" 200 950 "http://192.168.42.200:8080/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0" "-"
+azure-vote-front    | 192.168.42.1 - - [23/Feb/2018:17:50:28 +0000] "POST / HTTP/1.1" 200 950 "http://192.168.42.200:8080/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0" "-"
+
+cd ~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis
+// stop container
+docker-compose stop
+
+//Delete the stopped containers and resources with the following command.
+
+2.Deploy and use Azure Container Registry
+------------------------------------------
+
+az login
+az group create --name loganRG --location eastus
+az acr create --resource-group loganRG --name loganARC --sku Basic
+az acr login --name loganARC
+
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ az acr create --resource-group loganRG --name loganARC --sku Basic
+ - Running ..
+ - Running ..
+
+Create a new service principal and assign access:
+  az ad sp create-for-rbac --scopes /subscriptions/1dbe3374-7117-4934-959a-f25f75b9c5af/resourceGroups/loganRG/providers/Microsoft.ContainerRegistry/registries/loganARC --role Owner --password <password>
+
+Use an existing service principal and assign access:
+  az role assignment create --scope /subscriptions/1dbe3374-7117-4934-959a-f25f75b9c5af/resourceGroups/loganRG/providers/Microsoft.ContainerRegistry/registries/loganARC --role Owner --assignee <app-id>
+{
+  "adminUserEnabled": false,
+  "creationDate": "2018-02-23T18:50:28.438166+00:00",
+  "id": "/subscriptions/1dbe3374-7117-4934-959a-f25f75b9c5af/resourceGroups/loganRG/providers/Microsoft.ContainerRegistry/registries/loganARC",
+  "location": "eastus",
+  "loginServer": "loganarc.azurecr.io",
+  "name": "loganARC",
+  "provisioningState": "Succeeded",
+  "resourceGroup": "loganRG",
+  "sku": {
+    "name": "Basic",
+    "tier": "Basic"
+  },
+  "status": null,
+  "storageAccount": null,
+  "tags": {},
+  "type": "Microsoft.ContainerRegistry/registries"
+}
+docker-machine regenerate-certs default
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ az acr login --name loganARC
+Login Succeeded
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker images
+REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
+azure-vote-front             latest              3836a86acc83        About an hour ago   935MB
+redis                        latest              33c26d72bd74        8 days ago          107MB
+tiangolo/uwsgi-nginx-flask   python3.6           d3f7d9a2f84d        2 weeks ago         935MB
+
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ az acr list --resource-group loganRG --query "[].{acrLoginServer:loginServer}" --output table
+AcrLoginServer
+-------------------
+loganarc.azurecr.io
+
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker tag azure-vote-front loganarc.azurecr.io/azure-vote-front:v1
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker images
+REPOSITORY                             TAG                 IMAGE ID            CREATED             SIZE
+azure-vote-front                       latest              3836a86acc83        About an hour ago   935MB
+loganarc.azurecr.io/azure-vote-front   v1                  3836a86acc83        About an hour ago   935MB
+redis                                  latest              33c26d72bd74        8 days ago          107MB
+tiangolo/uwsgi-nginx-flask             python3.6           d3f7d9a2f84d        2 weeks ago         935MB
+
+
+docker push loganarc.azurecr.io/azure-vote-front:v1
+
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ docker push loganarc.azurecr.io/azure-vote-front:v1
+The push refers to repository [loganarc.azurecr.io/azure-vote-front]
+9645021bb43f: Pushed 
+d160cd749ba7: Pushed 
+1f6a42f2e735: Pushed 
+fc5f084dd381: Pushed 
+76ae1989419f: Pushed 
+9cdd657eb001: Pushed 
+4427d8454228: Pushed 
+6a6b0c984ca3: Pushed 
+20bf7fbd01e8: Pushed 
+48254366f38b: Pushed 
+cf74ce0b9af2: Pushed 
+db71b048b33a: Pushed 
+66bb86c4faa0: Pushed 
+cb5406ae34f6: Pushed 
+f967b78d85ff: Pushed 
+41df14a059d8: Pushed 
+ba45cb24724f: Pushed 
+827fb4dc0796: Pushed 
+23cdc5b41b4b: Pushed 
+01997c36bd36: Pushed 
+dd6313b3e8ff: Pushed 
+83008ab310c2: Pushed 
+88b8fc321f12: Pushed 
+4ea12feed6a9: Pushed 
+6662dddae6aa: Pushed 
+b31411566900: Pushed 
+06f4de5fefea: Pushed 
+851f3e348c69: Pushed 
+e27a10675c56: Pushed 
+v1: digest: sha256:76dcb7a32096200a6db9c777030dae815a613bf747a3838d857aef6b794064c2 size: 6379
+
+az acr repository list --name loganARC --output table
+
+az acr repository show-tags --name loganARC --repository azure-vote-front --output table
+
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ az acr repository list --name loganARC --output table
+Result
+----------------
+azure-vote-front
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ az acr repository show-tags --name loganARC --repository azure-vote-front --output table
+Result
+--------
+v1
+
+3. Deploy a Kubernetes cluster in Azure Container Service
+-----------------------------------------------------------
+
+az acs create --orchestrator-type kubernetes --resource-group loganRG --name loganK8SCluster --generate-ssh-keys --agent-count 1
+
+logan@ubuntu:~/ubuntusql/06_az_acs_kubernetes/azure-voting-app-redis$ az acs create --orchestrator-type kubernetes --resource-group loganRG --name loganK8SCluster --generate-ssh-keys --agent-count 1
+
+
+az acs kubernetes get-credentials --resource-group loganRG --name loganK8SCluster
+
+kubectl get nodes
+
+
+4. Run applications in Kubernetes
+----------------------------------
+
+vi azure-vote-all-in-one-redis.yml
+
+change 
+microsoft/azure-vote-front:v1
+to
+loganarc.azurecr.io/azure-vote-front:v1
+
+
+kubectl create -f azure-vote-all-in-one-redis.yml
+
+deployment "azure-vote-back" created
+service "azure-vote-back" created
+deployment "azure-vote-front" created
+service "azure-vote-front" created
+
+kubectl get service azure-vote-front --watch
+
+NAME               CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+azure-vote-front   10.0.42.158   <pending>     80:31873/TCP   1m
+azure-vote-front   10.0.42.158   52.179.23.131 80:31873/TCP   2m
+
+Browser to 52.179.23.131
+
+5. Scale Kubernetes pods and Kubernetes infrastructure
+--------------------------------------------------------
+
+kubectl get pods
+
+kubectl scale --replicas=2 deployment/azure-vote-front
+
+kubectl get pods
+
+kubectl autoscale deployment azure-vote-front --cpu-percent=50 --min=3 --max=10
+
+kubectl get hpa
+// scale agent
+az acs scale --resource-group=loganRG --name=loganK8SCluster --new-agent-count 4
+
+6. Update an application in Kubernetes
+---------------------------------------
+
+vi azure-vote/azure-vote/config_file.cfg
+
+# UI Configurations
+TITLE = 'Azure Voting App'
+VOTE1VALUE = 'Blue'
+VOTE2VALUE = 'Purple'
+SHOWHOST = 'false'
+
+docker-compose up --build -d
+
+//test locally
+Browse to http://localhost:8080 
+
+az acr list --resource-group loganRG --query "[].{acrLoginServer:loginServer}" --output table
+
+// tag loganarc.azurecr.io/azure-vote-front:v2
+docker tag azure-vote-front loganarc.azurecr.io/azure-vote-front:redis-v2
+
+//push
+docker push loganarc.azurecr.io/azure-vote-front:redis-v2
+
+kubectl get pod
+
+kubectl scale --replicas=3 deployment/azure-vote-front
+
+kubectl set image deployment azure-vote-front azure-vote-front=<loganarc.azurecr.io/azure-vote-front:redis-v2
+
+kubectl get pod
+
+kubectl get service azure-vote-front
+
+Browse to the IP address
+
+7. Monitor a Kubernetes cluster with Operations Management Suite
+-----------------------------------------------------------------
+
+https://docs.microsoft.com/en-us/azure/container-service/kubernetes/container-service-tutorial-kubernetes-monitor
+
+
+
