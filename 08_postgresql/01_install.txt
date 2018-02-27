@@ -32,6 +32,11 @@ postgres=# \q
 postgres@logan-vm:~$ exit
 logout
 
+or 
+
+sudo -u postgres psql
+postgres=# \q
+
 3. Service Start / Stop
 -----------------------
 service postgresql
@@ -63,3 +68,42 @@ root@logan-vm:~#
 4. Configure AutoStart
 -----------------------
 update-rc.d postgresql enable
+
+5. Add an user and database to Postgresql
+-----------------------------------------
+//By default, the new user role will access to database using same name:-)
+
+logan@logan-vm:~/UbuntuSQL/08_postgresql$ sudo -u postgres createuser --interactive
+[sudo] password for logan: 
+Enter name of role to add: logan
+Shall the new role be a superuser? (y/n) y
+logan@logan-vm:~/UbuntuSQL/08_postgresql$ psql 
+psql: FATAL:  database "logan" does not exist
+logan@logan-vm:~/UbuntuSQL/08_postgresql$ sudo -u postgres createdb logan
+logan@logan-vm:~/UbuntuSQL/08_postgresql$ psql 
+psql (9.5.11)
+Type "help" for help.
+
+logan=# \conninfo
+You are connected to database "logan" as user "logan" via socket in "/var/run/postgresql" at port "5432".
+logan=# \q
+
+// using -d to specify a database to connect
+logan@logan-vm:~/UbuntuSQL/08_postgresql$ psql -d postgres
+psql (9.5.11)
+Type "help" for help.
+
+postgres=# \conninfo
+You are connected to database "postgres" as user "logan" via socket in "/var/run/postgresql" at port "5432".
+postgres=# 
+
+logan=# 
+
+6. psql
+-------
+// http://postgresguide.com/utilities/psql.html
+
+psql "dbname=dbhere host=hosthere user=userhere password=pwhere port=5432 sslmode=require"
+
+
+
