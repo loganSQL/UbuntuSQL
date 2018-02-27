@@ -1,0 +1,65 @@
+1. Installation
+---------------
+logan@logan-vm:~/UbuntuSQL/08_postgresql$ sudo su -
+[sudo] password for logan: 
+
+root@logan-vm:~# apt-get install postgresql postgresql-contrib
+ ...
+Adding user postgres to group ssl-cert
+
+Creating config file /etc/postgresql-common/createcluster.conf with new version
+
+Creating config file /etc/logrotate.d/postgresql-common with new version
+...
+Creating new cluster 9.5/main ...
+  config /etc/postgresql/9.5/main
+  data   /var/lib/postgresql/9.5/main
+  locale en_US.UTF-8
+  socket /var/run/postgresql
+  port   5432
+...
+
+2. Connection
+--------------
+root@logan-vm:~# su - postgres
+
+postgres@logan-vm:~$ psql
+psql (9.5.11)
+Type "help" for help.
+
+postgres=# \q
+
+postgres@logan-vm:~$ exit
+logout
+
+3. Service Start / Stop
+-----------------------
+service postgresql
+Usage: /etc/init.d/postgresql {start|stop|restart|reload|force-reload|status} [version ..]
+root@logan-vm:~# service postgresql status
+● postgresql.service - PostgreSQL RDBMS
+   Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor preset: enabled)
+   Active: active (exited) since Tue 2018-02-27 15:17:35 EST; 3min 35s ago
+ Main PID: 66801 (code=exited, status=0/SUCCESS)
+   CGroup: /system.slice/postgresql.service
+
+Feb 27 15:17:35 logan-vm systemd[1]: Starting PostgreSQL RDBMS...
+Feb 27 15:17:35 logan-vm systemd[1]: Started PostgreSQL RDBMS.
+Feb 27 15:17:42 logan-vm systemd[1]: Started PostgreSQL RDBMS.
+root@logan-vm:~# service postgresql stop
+root@logan-vm:~# service postgresql status
+● postgresql.service - PostgreSQL RDBMS
+   Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor preset: enabled)
+   Active: inactive (dead) since Tue 2018-02-27 15:21:19 EST; 7s ago
+ Main PID: 66801 (code=exited, status=0/SUCCESS)
+
+Feb 27 15:17:35 logan-vm systemd[1]: Starting PostgreSQL RDBMS...
+Feb 27 15:17:35 logan-vm systemd[1]: Started PostgreSQL RDBMS.
+Feb 27 15:17:42 logan-vm systemd[1]: Started PostgreSQL RDBMS.
+Feb 27 15:21:19 logan-vm systemd[1]: Stopped PostgreSQL RDBMS.
+root@logan-vm:~# service postgresql start
+root@logan-vm:~# 
+
+4. Configure AutoStart
+-----------------------
+update-rc.d postgresql enable
