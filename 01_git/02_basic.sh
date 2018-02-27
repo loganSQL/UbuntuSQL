@@ -6,6 +6,10 @@ git clone https://github.com/loganSQL/UbuntuSQL.git myclone
 
 # https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes
 git remote -v
+
+cd your_dir
+git pull origin master
+
 git status
 git status -s
 git diff
