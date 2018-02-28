@@ -1,6 +1,6 @@
 
 ## PSQL
-
+(This cheatsheet is from https://gist.github.com/Kartones/dd3ff5ec5ea238d4c546)
 Magic words:
 ```bash
 psql -U postgres
