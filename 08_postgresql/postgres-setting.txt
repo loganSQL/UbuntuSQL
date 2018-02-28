@@ -1,3 +1,6 @@
+Deep Dives into Postgresql Settings
+===================================
+
 logan@logan-vm:/var/lib/postgresql/9.5$ sudo su -
 [sudo] password for logan: 
 root@logan-vm:~# pwd
