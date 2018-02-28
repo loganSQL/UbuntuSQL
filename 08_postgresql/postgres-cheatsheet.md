@@ -1,6 +1,6 @@
 
 ## PSQL
-This cheatsheet is from Kartones 
+This cheatsheet was from Kartones 
 (https://gist.github.com/Kartones/dd3ff5ec5ea238d4c546)
 
 Magic words:
