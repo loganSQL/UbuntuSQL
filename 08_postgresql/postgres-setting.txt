@@ -1,0 +1,471 @@
+logan@logan-vm:/var/lib/postgresql/9.5$ sudo su -
+[sudo] password for logan: 
+root@logan-vm:~# pwd
+/root
+root@logan-vm:/var/run/postgresql# ps auxw |  grep postgres | grep -- -D
+postgres   1031  0.0  1.0 294704 20668 ?        S    11:46   0:00 /usr/lib/postgresql/9.5/bin/postgres -D /var/lib/postgresql/9.5/main -c config_file=/etc/postgresql/9.5/main/postgresql.conf
+
+//*******************************************************
+//	Bin: 	/usr/lib/postgresql/9.5/bin
+//	Data:	/var/lib/postgresql/9.5/main
+//	Config:	/etc/postgresql/9.5/main/postgresql.conf
+//*******************************************************
+
+
+root@logan-vm:~# cd /var/lib/postgresql/9.5/main/
+root@logan-vm:/var/lib/postgresql/9.5/main# ls -latr
+total 92
+drwxr-xr-x  3 postgres postgres 4096 Feb 27 15:17 ..
+-rw-------  1 postgres postgres    4 Feb 27 15:17 PG_VERSION
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_twophase
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_tblspc
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_stat_tmp
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_snapshots
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_serial
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_replslot
+drwx------  4 postgres postgres 4096 Feb 27 15:17 pg_multixact
+drwx------  4 postgres postgres 4096 Feb 27 15:17 pg_logical
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_dynshmem
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_commit_ts
+-rw-------  1 postgres postgres   88 Feb 27 15:17 postgresql.auto.conf
+drwx------  3 postgres postgres 4096 Feb 27 15:17 pg_xlog
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_subtrans
+drwx------  2 postgres postgres 4096 Feb 27 15:17 pg_clog
+drwx------  6 postgres postgres 4096 Feb 27 15:44 base
+drwx------ 19 postgres postgres 4096 Feb 28 11:46 .
+-rw-------  1 postgres postgres  100 Feb 28 11:46 postmaster.pid
+drwx------  2 postgres postgres 4096 Feb 28 11:46 pg_notify
+-rw-------  1 postgres postgres  133 Feb 28 11:46 postmaster.opts
+drwx------  2 postgres postgres 4096 Feb 28 11:46 pg_stat
+drwx------  2 postgres postgres 4096 Feb 28 11:46 global
+
+
+root@logan-vm:/var/run/postgresql# cat /etc/postgresql/9.5/main/postgresql.conf
+# -----------------------------
+# PostgreSQL configuration file
+# -----------------------------
+#
+...
+#------------------------------------------------------------------------------
+# FILE LOCATIONS
+#------------------------------------------------------------------------------
+
+# The default values of these variables are driven from the -D command-line
+# option or PGDATA environment variable, represented here as ConfigDir.
+
+data_directory = '/var/lib/postgresql/9.5/main'		# use data in another directory
+					# (change requires restart)
+hba_file = '/etc/postgresql/9.5/main/pg_hba.conf'	# host-based authentication file
+					# (change requires restart)
+ident_file = '/etc/postgresql/9.5/main/pg_ident.conf'	# ident configuration file
+					# (change requires restart)
+
+# If external_pid_file is not explicitly set, no extra PID file is written.
+external_pid_file = '/var/run/postgresql/9.5-main.pid'			# write an extra PID file
+					# (change requires restart)
+
+
+...
+#------------------------------------------------------------------------------
+# ERROR REPORTING AND LOGGING
+#------------------------------------------------------------------------------
+
+# - Where to Log -
+
+#log_destination = 'stderr'		# Valid values are combinations of
+					# stderr, csvlog, syslog, and eventlog,
+					# depending on platform.  csvlog
+					# requires logging_collector to be on.
+
+# This is used when logging to stderr:
+#logging_collector = off		# Enable capturing of stderr and csvlog
+					# into log files. Required to be on for
+					# csvlogs.
+					# (change requires restart)
+
+# These are only used if logging_collector is on:
+#log_directory = 'pg_log'		# directory where log files are written,
+					# can be absolute or relative to PGDATA
+#log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
+					# can include strftime() escapes
+#log_file_mode = 0600			# creation mode for log files,
+					# begin with 0 to use octal notation
+#log_truncate_on_rotation = off		# If on, an existing log file with the
+					# same name as the new log file will be
+					# truncated rather than appended to.
+					# But such truncation only occurs on
+					# time-driven rotation, not on restarts
+					# or size-driven rotation.  Default is
+					# off, meaning append to existing files
+					# in all cases.
+#log_rotation_age = 1d			# Automatic rotation of logfiles will
+					# happen after that time.  0 disables.
+#log_rotation_size = 10MB		# Automatic rotation of logfiles will
+					# happen after that much log output.
+
+...
+
+
+root@logan-vm:/var/run/postgresql# ls -latr /usr/lib/postgresql/9.5/bin
+total 9044
+lrwxrwxrwx 1 root root       8 Feb  8 11:23 postmaster -> postgres
+-rwxr-xr-x 1 root root  100872 Feb  8 11:24 pg_upgrade
+-rwxr-xr-x 1 root root   43304 Feb  8 11:24 pg_ctl
+-rwxr-xr-x 1 root root   38912 Feb  8 11:24 pg_controldata
+-rwxr-xr-x 1 root root   76480 Feb  8 11:24 vacuumdb
+-rwxr-xr-x 1 root root 6499656 Feb  8 11:24 postgres
+-rwxr-xr-x 1 root root   72192 Feb  8 11:24 pg_xlogdump
+-rwxr-xr-x 1 root root   80272 Feb  8 11:24 pg_rewind
+-rwxr-xr-x 1 root root  159008 Feb  8 11:24 pg_restore
+-rwxr-xr-x 1 root root   47112 Feb  8 11:24 pg_resetxlog
+-rwxr-xr-x 1 root root   56056 Feb  8 11:24 pg_recvlogical
+-rwxr-xr-x 1 root root   93384 Feb  8 11:24 pg_dumpall
+-rwxr-xr-x 1 root root  364192 Feb  8 11:24 pg_dump
+-rwxr-xr-x 1 root root  114296 Feb  8 11:24 initdb
+-rwxr-xr-x 1 root root   63872 Feb  8 11:24 dropuser
+-rwxr-xr-x 1 root root   68096 Feb  8 11:24 clusterdb
+-rwxr-xr-x 1 root root   72288 Feb  8 11:24 reindexdb
+-rwxr-xr-x 1 root root  556280 Feb  8 11:24 psql
+-rwxr-xr-x 1 root root   51792 Feb  8 11:24 pg_receivexlog
+-rwxr-xr-x 1 root root   30952 Feb  8 11:24 pg_isready
+-rwxr-xr-x 1 root root   72512 Feb  8 11:24 pg_basebackup
+-rwxr-xr-x 1 root root   67984 Feb  8 11:24 droplang
+-rwxr-xr-x 1 root root   63904 Feb  8 11:24 dropdb
+-rwxr-xr-x 1 root root   72640 Feb  8 11:24 createuser
+-rwxr-xr-x 1 root root   67984 Feb  8 11:24 createlang
+-rwxr-xr-x 1 root root   68160 Feb  8 11:24 createdb
+-rwxr-xr-x 1 root root   22520 Feb  8 11:24 vacuumlo
+-rwxr-xr-x 1 root root   14408 Feb  8 11:24 pg_test_timing
+-rwxr-xr-x 1 root root   18544 Feb  8 11:24 pg_test_fsync
+-rwxr-xr-x 1 root root   22536 Feb  8 11:24 pg_standby
+-rwxr-xr-x 1 root root   81016 Feb  8 11:24 pgbench
+-rwxr-xr-x 1 root root   18424 Feb  8 11:24 pg_archivecleanup
+-rwxr-xr-x 1 root root   26616 Feb  8 11:24 oid2name
+drwxr-xr-x 4 root root    4096 Feb 27 15:17 ..
+drwxr-xr-x 2 root root    4096 Feb 27 15:17 .
+
+
+// SHOW / SET / RESET commands
+
+logan@logan-vm:$ psql
+psql (9.5.11)
+Type "help" for help.
+
+logan=# SHOW data_directory;
+        data_directory        
+------------------------------
+ /var/lib/postgresql/9.5/main
+(1 row)
+        
+logan=# show all;
+
+...
+
+logan=# show max_connections;
+ max_connections 
+-----------------
+ 100
+(1 row)
+
+logan=# show log_filename;
+          log_filename          
+--------------------------------
+ postgresql-%Y-%m-%d_%H%M%S.log
+(1 row)
+
+logan=# show log_directory;
+ log_directory 
+---------------
+ pg_log
+(1 row)
+
+// pg_settings
+
+logan-# \d pg_settings
+     View "pg_catalog.pg_settings"
+     Column      |  Type   | Modifiers 
+-----------------+---------+-----------
+ name            | text    | 
+ setting         | text    | 
+ unit            | text    | 
+ category        | text    | 
+ short_desc      | text    | 
+ extra_desc      | text    | 
+ context         | text    | 
+ vartype         | text    | 
+ source          | text    | 
+ min_val         | text    | 
+ max_val         | text    | 
+ enumvals        | text[]  | 
+ boot_val        | text    | 
+ reset_val       | text    | 
+ sourcefile      | text    | 
+ sourceline      | integer | 
+ pending_restart | boolean | 
+
+// first 10 settings
+logan=# select name from pg_settings fetch first 10 rows only;
+              name               
+---------------------------------
+ allow_system_table_mods
+ application_name
+ archive_command
+ archive_mode
+ archive_timeout
+ array_nulls
+ authentication_timeout
+ autovacuum
+ autovacuum_analyze_scale_factor
+ autovacuum_analyze_threshold
+(10 rows)
+
+// last 5 settings
+logan=# WITH t AS (
+logan(# select name from pg_settings order by name DESC LIMIT 5)
+logan-# SELECT * FROM t ORDER BY name ASC;
+        name        
+--------------------
+ wal_writer_delay
+ work_mem
+ xmlbinary
+ xmloption
+ zero_damaged_pages
+(5 rows)
+
+logan=# select name from pg_settings where name like '%cpu%';
+         name         
+----------------------
+ cpu_index_tuple_cost
+ cpu_operator_cost
+ cpu_tuple_cost
+(3 rows)
+
+logan=# select name from pg_settings where name like '%mem%';
+            name            
+----------------------------
+ autovacuum_work_mem
+ dynamic_shared_memory_type
+ maintenance_work_mem
+ work_mem
+(4 rows)
+
+logan=# select name from pg_settings where name like '%file%';
+         name          
+-----------------------
+ config_file
+ external_pid_file
+ hba_file
+ ident_file
+ krb_server_keyfile
+ log_file_mode
+ log_filename
+ log_temp_files
+ max_files_per_process
+ ssl_ca_file
+ ssl_cert_file
+ ssl_crl_file
+ ssl_key_file
+ temp_file_limit
+(14 rows)
+
+logan=# \x on
+Expanded display is on.
+logan=# select * from pg_settings where name like 'log_filename';
+-[ RECORD 1 ]---+------------------------------------------
+name            | log_filename
+setting         | postgresql-%Y-%m-%d_%H%M%S.log
+unit            | 
+category        | Reporting and Logging / Where to Log
+short_desc      | Sets the file name pattern for log files.
+extra_desc      | 
+context         | sighup
+vartype         | string
+source          | default
+min_val         | 
+max_val         | 
+enumvals        | 
+boot_val        | postgresql-%Y-%m-%d_%H%M%S.log
+reset_val       | postgresql-%Y-%m-%d_%H%M%S.log
+sourcefile      | 
+sourceline      | 
+pending_restart | f
+
+logan=# \x auto
+Expanded display is used automatically.
+logan=# select * from pg_settings;
+
+logan=# select name from pg_settings where name like '%server%';
+           name            
+---------------------------
+ krb_server_keyfile
+ server_encoding
+ server_version
+ server_version_num
+ ssl_prefer_server_ciphers
+(5 rows)
+
+logan=# show server_version;
+ server_version 
+----------------
+ 9.5.11
+(1 row)
+
+logan=# show server_version_num;
+ server_version_num 
+--------------------
+ 90511
+(1 row)
+
+// ALTER SYSTEM -- change a server configuration parameter 
+
+ALTER SYSTEM SET configuration_parameter { TO | = } { value | 'value' | DEFAULT }
+
+ALTER SYSTEM RESET configuration_parameter
+ALTER SYSTEM RESET ALL
+
+
+ALTER SYSTEM is used for changing server configuration parameters across the entire database cluster. It can be more convenient than the traditional method of manually editing the postgresql.conf file. ALTER SYSTEM writes the given parameter setting to the postgresql.auto.conf file, which is read in addition to postgresql.conf. Setting a parameter to DEFAULT, or using the RESET variant, removes that configuration entry from the postgresql.auto.conf file. Use RESET ALL to remove all such configuration entries.
+
+Values set with ALTER SYSTEM will be effective after the next server configuration reload (SIGHUP or pg_ctl reload), or after the next server restart in the case of parameters that can only be changed at server start.
+
+Only superusers can use ALTER SYSTEM. Also, since this command acts directly on the file system and cannot be rolled back, it is not allowed inside a transaction block or function.
+
+logan=# ALTER SYSTEM SET MAX_CONNECTIONS=110;
+ALTER SYSTEM
+logan=# SHOW MAX_CONNECTIONS;
+ max_connections 
+-----------------
+ 100
+(1 row)
+logan@logan-vm:/var/lib/postgresql/9.5$ service postgresql status
+● postgresql.service - PostgreSQL RDBMS
+   Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor preset: enabled)
+   Active: active (exited) since Wed 2018-02-28 11:46:24 EST; 2h 23min ago
+  Process: 1345 ExecStart=/bin/true (code=exited, status=0/SUCCESS)
+ Main PID: 1345 (code=exited, status=0/SUCCESS)
+    Tasks: 0
+   Memory: 0B
+      CPU: 0
+   CGroup: /system.slice/postgresql.service
+
+Feb 28 11:46:24 logan-vm systemd[1]: Starting PostgreSQL RDBMS...
+Feb 28 11:46:24 logan-vm systemd[1]: Started PostgreSQL RDBMS.
+logan@logan-vm:/var/lib/postgresql/9.5$ service postgresql restart
+logan@logan-vm:/var/lib/postgresql/9.5$ service postgresql status
+● postgresql.service - PostgreSQL RDBMS
+   Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor preset: enabled)
+   Active: active (exited) since Wed 2018-02-28 14:10:40 EST; 8s ago
+  Process: 7473 ExecStart=/bin/true (code=exited, status=0/SUCCESS)
+ Main PID: 7473 (code=exited, status=0/SUCCESS)
+
+Feb 28 14:10:40 logan-vm systemd[1]: Starting PostgreSQL RDBMS...
+Feb 28 14:10:40 logan-vm systemd[1]: Started PostgreSQL RDBMS.
+logan@logan-vm:/var/lib/postgresql/9.5$ psql
+psql (9.5.11)
+Type "help" for help.
+
+logan=# show max_connections;
+ max_connections 
+-----------------
+ 110
+(1 row)
+logan=# ALTER SYSTEM SET MAX_CONNECTIONS=100;
+ALTER SYSTEM
+logan-# \q
+
+logan@logan-vm:/var/lib/postgresql/9.5$ service postgresql restart
+logan@logan-vm:/var/lib/postgresql/9.5$ 
+
+
+//***********************************************************************
+// Error Log
+// https://www.endpoint.com/blog/2014/11/12/dear-postgresql-where-are-my-logs
+//*************************************************************************
+logan=# show log_destination ;
+ log_destination 
+-----------------
+ stderr
+(1 row)
+
+logan=# show syslog_facility ;
+ syslog_facility 
+-----------------
+ local0
+(1 row)
+
+logan=# show syslog_ident ;
+ syslog_ident 
+--------------
+ postgres
+(1 row)
+
+logan=# show logging_collector ;
+ logging_collector 
+-------------------
+ off
+(1 row)
+
+logan=# show log_directory ;
+ log_directory 
+---------------
+ pg_log
+(1 row)
+
+logan=# show data_directory ;
+        data_directory        
+------------------------------
+ /var/lib/postgresql/9.5/main
+(1 row)
+
+logan=# show log_filename ;
+          log_filename          
+--------------------------------
+ postgresql-%Y-%m-%d_%H%M%S.log
+(1 row)
+
+// Even logging_collector is off
+
+logan=# select pg_backend_pid() ;
+ pg_backend_pid 
+----------------
+           7958
+(1 row)
+
+logan=# show max_connection;
+ERROR:  unrecognized configuration parameter "max_connection"
+logan=# 
+
+
+logan=# 
+
+// Another terminal to see the log for pid = 7958
+root@logan-vm:/proc# ll /proc/7958/fd/2
+l-wx------ 1 postgres postgres 64 Feb 28 14:42 /proc/7958/fd/2 -> /var/log/postgresql/postgresql-9.5-main.log
+root@logan-vm:/proc# tail -f /proc/7958/fd/2
+2018-02-28 14:29:14 EST [7456-8] LOG:  received fast shutdown request
+2018-02-28 14:29:14 EST [7456-9] LOG:  aborting any active transactions
+2018-02-28 14:29:14 EST [7461-2] LOG:  autovacuum launcher shutting down
+2018-02-28 14:29:14 EST [7458-1] LOG:  shutting down
+2018-02-28 14:29:14 EST [7458-2] LOG:  database system is shut down
+2018-02-28 14:29:15 EST [7746-1] LOG:  database system was shut down at 2018-02-28 14:29:14 EST
+2018-02-28 14:29:15 EST [7746-2] LOG:  MultiXact member wraparound protections are now enabled
+2018-02-28 14:29:15 EST [7745-1] LOG:  database system is ready to accept connections
+2018-02-28 14:29:15 EST [7750-1] LOG:  autovacuum launcher started
+2018-02-28 14:29:16 EST [7752-1] [unknown]@[unknown] LOG:  incomplete startup packet
+2018-02-28 14:45:05 EST [7958-1] logan@logan ERROR:  unrecognized configuration parameter "max_connection"
+2018-02-28 14:45:05 EST [7958-2] logan@logan STATEMENT:  show max_connection;
+...
+root@logan-vm:/proc# cd /var/log/postgresql/
+root@logan-vm:/var/log/postgresql# ls -latr
+total 16
+drwxrwxr-t  2 root     postgres 4096 Feb 27 15:17 .
+drwxrwxr-x 15 root     syslog   4096 Feb 28 11:51 ..
+-rw-r-----  1 postgres adm      6695 Feb 28 14:45 postgresql-9.5-main.log
+
+
+// Using CSV-Format Log Output
+https://www.postgresql.org/docs/9.3/static/runtime-config-logging.html#RUNTIME-CONFIG-LOGGING-CSVLOG
+
+
+
+
