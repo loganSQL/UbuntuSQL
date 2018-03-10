@@ -20,4 +20,15 @@ sudo apt-get update
 sudo apt-get install docker-ce
 sudo docker run hello-world
 
-#
+#	Manage Docker as a non-root user
+
+#    Create the docker group.
+
+sudo groupadd docker
+
+#    Add your user to the docker group.
+
+sudo usermod -aG docker $USER
+
+# Log out and log back in so that your group membership is re-evaluated.
+

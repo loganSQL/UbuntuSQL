@@ -4,9 +4,9 @@
 # pull mssql docker image
 sudo docker pull microsoft/mssql-server-linux:2017-latest
 # run the image and build the container
-sudo docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=meltdown2018' \
-   -p 1401:1433 --name sql1 \
-   -d microsoft/mssql-server-linux:2017-latest
+sudo docker run -d -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=Xmas2017' \
+   -p 1433:1433 --name FirstSQL2017 microsoft/mssql-server-linux:2017-latest
+
 # container is built but not started
 sudo docker ps -a
 # start the container
