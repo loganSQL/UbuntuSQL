@@ -125,5 +125,98 @@ psql "dbname=dbhere host=hosthere user=userhere password=pwhere port=5432 sslmod
 \df
 \df+
 
+7. New User
+------------
+create user testuser with password 'testuser';
+grant all privileges on database logan to testuser
+
+# create a user and a database
+sudo -u postgres createuser -D -A -P myuser
+sudo -u postgres createdb -O myuser mydb
+
+8. Remote Connection
+---------------------
+
+https://help.ubuntu.com/community/PostgreSQL
+
+
+By default PostgreSQL is configured to be bound to “localhost”.
+
+netstat -nlt
+
+telnet 172.19.201.711 5432
+
+### listen to 127.0.0.1:5432
+
+# Change postgresql.conf to listen to all IPs
+
+sudo find \ -name "postgresql.conf"
+
+sudo vi /etc/postgresql/9.5/main/postgresql.conf
+
+replace
+listen_addresses = 'localhost'
+with
+listen_addresses = '*'
+
+# Restart Postgresql
+sudo service postgresql stop
+sudo service postgresql start
+
+netstat -nlt
+#### listen to 0.0.0.0:5432 now
+
+# Configuring pg_hba.conf
+
+# add the following
+host    all             all              0.0.0.0/0                       md5
+host    all             all              ::/0                            md5
+# Restart Postgresql
+sudo service postgresql stop
+sudo service postgresql start
+
+
+9. Install Postgresql Client
+-----------------------------
+sudo apt-get install postgresql-client
+
+psql --help
+psql -h host -U user -d db
+
+psql -h 172.19.201.211 -U testuser -d logan
+
+10. Check connection
+---------------------
+
+# 1) show you any processes running as user postgres
+ps -u postgres -f 
+
+UID         PID   PPID  C STIME TTY          TIME CMD
+postgres  99670      1  0 13:34 ?        00:00:00 /usr/lib/postgresql/9.5/bin/postgres -D /var/lib/postgresql/9.5/
+postgres  99672  99670  0 13:34 ?        00:00:00 postgres: checkpointer process   
+postgres  99673  99670  0 13:34 ?        00:00:00 postgres: writer process   
+postgres  99674  99670  0 13:34 ?        00:00:00 postgres: wal writer process   
+postgres  99675  99670  0 13:34 ?        00:00:00 postgres: autovacuum launcher process   
+postgres  99676  99670  0 13:34 ?        00:00:00 postgres: stats collector process   
+postgres  99702  99670  0 13:34 ?        00:00:00 postgres: testuser postgres 172.19.201.209(61373) idle
+postgres 100591  99670  0 14:31 ?        00:00:00 postgres: testuser logan 172.19.201.209(62112) idle
+
+# 2) make sure the server is listening where your client thinks it is
+# => PostgreSQL server's socket directory
+sudo -u postgres psql -c "SHOW unix_socket_directories;"
+
+# 3) show port
+# To show the server's port (which applies for both TCP/IP and unix sockets): 
+sudo -u postgres psql -c "SHOW port;"
+
+# 4) If you can't even connect with psql under unix user postgres you can check the socket dir with lsof: 
+logan@logan-vm:~/Ubuntu/08_postgresql$ sudo lsof -U -a -c postgres
+COMMAND    PID     USER   FD   TYPE             DEVICE SIZE/OFF   NODE NAME
+postgres 99670 postgres    8u  unix 0xffff8f92766c0000      0t0 255133 /var/run/postgresql/.s.PGSQL.5432 type=STREAM
+
+# This server has socket directory /var/run with port 5432. 
+
+
+
 
 
